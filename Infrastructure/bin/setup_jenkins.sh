@@ -35,7 +35,7 @@ while : ; do
         echo 'jenkins-slave-appdev build completed'
         break
       else
-        echo 'jenkins-slave-appdev building sleep 10'
+        echo 'jenkins-slave-appdev building sleep 20'
         sleep 20
     fi
 done
