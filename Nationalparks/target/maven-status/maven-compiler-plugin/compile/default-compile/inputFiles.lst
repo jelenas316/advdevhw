@@ -1,0 +1,11 @@
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/db/ParkReadConverter.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/model/Coordinates.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/model/Park.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/rest/gateway/model/Backend.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/NationalParksApplication.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/rest/Healthz.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/db/ParksAppConfig.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/db/MongoDBConnection.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/rest/BackendController.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/rest/gateway/model/Coordinates.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/Nationalparks/src/main/java/com/openshift/evg/roadshow/parks/rest/Parks.java

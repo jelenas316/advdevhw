@@ -10,6 +10,7 @@ fi
 GUID=$1
 REPO=$2
 CLUSTER=$3
+oc project ${GUID}-jenkins
 echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cluster ${CLUSTER}"
 oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=4Gi --param VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
 oc rollout pause dc jenkins -n ${GUID}-jenkins
@@ -20,7 +21,7 @@ while : ; do
     oc get pod -n ${GUID}-jenkins | grep -v deploy | grep "1/1"
     if [ $? == "1" ] 
       then 
-        sleep 20
+        sleep 10
       else 
         break 
     fi
@@ -35,8 +36,8 @@ while : ; do
         echo 'jenkins-slave-appdev build completed'
         break
       else
-        echo 'jenkins-slave-appdev building sleep 20'
-        sleep 20
+        echo 'jenkins-slave-appdev building sleep 10'
+        sleep 10
     fi
 done
 
@@ -50,7 +51,6 @@ oc create -f Infrastructure/templates/bc-parksmap.yaml -n ${GUID}-jenkins
 oc set env bc/mlbparks-pipeline GUID=${GUID} REPO=${REPO} CLUSTER=${CLUSTER} -n ${GUID}-jenkins
 oc set env bc/nationalparks-pipeline GUID=${GUID} REPO=${REPO} CLUSTER=${CLUSTER} -n ${GUID}-jenkins
 oc set env bc/parksmap-pipeline GUID=${GUID} REPO=${REPO} CLUSTER=${CLUSTER} -n ${GUID}-jenkins
-
 
 # Code to set up the Jenkins project to execute the
 # three pipelines.

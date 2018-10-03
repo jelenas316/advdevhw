@@ -1,0 +1,11 @@
+com/openshift/evg/roadshow/parks/model/Coordinates.class
+com/openshift/evg/roadshow/rest/gateway/model/Backend.class
+com/openshift/evg/roadshow/parks/NationalParksApplication.class
+com/openshift/evg/roadshow/parks/db/MongoDBConnection.class
+com/openshift/evg/roadshow/parks/rest/BackendController.class
+com/openshift/evg/roadshow/parks/db/ParkReadConverter.class
+com/openshift/evg/roadshow/parks/rest/Healthz.class
+com/openshift/evg/roadshow/parks/db/ParksAppConfig.class
+com/openshift/evg/roadshow/parks/rest/Parks.class
+com/openshift/evg/roadshow/rest/gateway/model/Coordinates.class
+com/openshift/evg/roadshow/parks/model/Park.class

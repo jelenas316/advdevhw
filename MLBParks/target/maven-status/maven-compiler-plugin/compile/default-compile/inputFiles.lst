@@ -1,0 +1,10 @@
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/rest/MLBParksApplication.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/model/Coordinates.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/model/MLBPark.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/rest/Healthz.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/rest/gateway/model/Backend.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/rest/BackendController.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/db/MongoDBConnection.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/model/DataPoint.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/rest/MLBParks.java
+/home/uros.zugic-devoteam.com/advdev_homework_template/MLBParks/src/main/java/com/openshift/evg/roadshow/rest/gateway/model/Coordinates.java
