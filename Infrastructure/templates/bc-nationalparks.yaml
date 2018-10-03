@@ -7,7 +7,7 @@ spec:
     contextDir: Nationalparks
     type: Git
     git:
-      uri: "https://github.com/xieyang313/advdev_homework_template.git"
+      uri: "https://github.com/dulecux/adv-homework_template.git"
       ref: "master"
   strategy:
     jenkinsPipelineStrategy:
