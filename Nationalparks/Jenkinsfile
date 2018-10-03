@@ -31,7 +31,7 @@ podTemplate(
 
     sh "sed -i 's/CLUSTER/${CLUSTER}/' ./Nationalparks/nexus_settings.xml"
     
-    def mvnCmd = "mvn -s ../nexus_settings.xml"
+    def mvnCmd = "mvn -s ./nexus_settings.xml"
 
     def groupId    = getGroupIdFromPom("./Nationalparks/pom.xml")
     def artifactId = getArtifactIdFromPom("./Nationalparks/pom.xml")
