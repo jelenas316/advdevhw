@@ -7,7 +7,7 @@ spec:
     contextDir: MLBParks
     type: Git
     git:
-      uri: "https://github.com/uzugic/adv_dev_homework_template"
+      uri: "https://github.com/dulecux/adv-homework_template"
       ref: "master"
   strategy:
     jenkinsPipelineStrategy:
