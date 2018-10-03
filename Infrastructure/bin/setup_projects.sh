@@ -1,5 +1,7 @@
 #!/bin/bash
 # Create all Homework Projects
+
+echo "Create Projects Start"
 if [ "$#" -ne 2 ]; then
     echo "Usage:"
     echo "  $0 GUID USER"

@@ -16,6 +16,132 @@ podTemplate(
     echo "GUID: ${GUID}"
     echo "CLUSTER: ${CLUSTER}"
 
+    
+    stage('Checkout Source') {
+     checkout scm
+    }
+
+    sh "pwd"
+
+    sh "ls"
+
+    sh "cp ./nexus_settings.xml ./Nationalparks/"
+
+    sh "sed -i 's/GUID/${GUID}/' ./Nationalparks/nexus_settings.xml"
+
+    sh "sed -i 's/CLUSTER/${CLUSTER}/' ./Nationalparks/nexus_settings.xml"
+    
+    def mvnCmd = "mvn -s ./Nationalparks/nexus_settings.xml"
+
+    def groupId    = getGroupIdFromPom("./Nationalparks/pom.xml")
+    def artifactId = getArtifactIdFromPom("./Nationalparks/pom.xml")
+    def version    = getVersionFromPom("./Nationalparks/pom.xml")
+
+    // Set the tag for the development image: version + build number
+    def devTag  = "${version}-${BUILD_NUMBER}"
+    // Set the tag for the production image: version
+    def prodTag = "${version}"
+
+    stage('Build war') {
+      echo "Building version ${version}"
+    
+      sh "${mvnCmd} -f ./Nationalparks/pom.xml clean package -DskipTests"
+    }
+
+    // Using Maven run the unit tests
+    stage('Unit Tests') {
+      echo "Running Unit Tests"
+    
+      sh "${mvnCmd} -f ./Nationalparks/pom.xml test"
+    }
+    
+    // Using Maven call SonarQube for Code Analysis
+    stage('Code Analysis') {
+      echo "Running Code Analysis"
+    
+      sh "${mvnCmd} -f ./Nationalparks/pom.xml sonar:sonar -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.${CLUSTER}/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+    }
+
+    // Publish the built war file to Nexus
+    stage('Publish to Nexus') {
+      echo "Publish to Nexus"
+    
+      sh "${mvnCmd} -f ./Nationalparks/pom.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.${CLUSTER}/repository/releases/"
+    }
+
+      // Build the OpenShift Image in OpenShift and tag it.
+    stage('Build and Tag OpenShift Image') {
+      echo "Building OpenShift container image nationalparks:${devTag}"
+    
+      sh "oc start-build nationalparks --follow --from-file=./Nationalparks/target/nationalparks.jar -n ${GUID}-parks-dev"
+    
+      openshiftTag alias: 'false', destStream: 'nationalparks', destTag: devTag, destinationNamespace: '${GUID}-parks-dev', namespace: '${GUID}-parks-dev', srcStream: 'nationalparks', srcTag: 'latest', verbose: 'false'
+    }
+
+    stage('Deploy to Dev') {
+    echo "Deploying container image to Development Project"
+    
+    // Update the Image on the Development Deployment Config
+    sh "oc set image dc/nationalparks nationalparks=docker-registry.default.svc:5000/${GUID}-parks-dev/nationalparks:${devTag} -n ${GUID}-parks-dev"
+
+    // Deploy the development application.
+    // Replace xyz-tasks-dev with the name of your production project
+    openshiftDeploy depCfg: 'nationalparks', namespace: '${GUID}-parks-dev', verbose: 'false', waitTime: '20', waitUnit: 'min'
+    openshiftVerifyDeployment depCfg: 'nationalparks', namespace: '${GUID}-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+    openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'nationalparks', verbose: 'false'
+  }
+
+  stage('Integration Tests') {
+    echo "Running Integration Tests"
+    sleep 30
+    echo "ls ws info"
+    sh "curl -i -H 'Content-Length: 0' -X GET http://nationalparks-${GUID}-parks-dev.apps.${CLUSTER}/ws/info/"
+ 
+  }
+
+  stage('Copy Image to Nexus Docker Registry') {
+    echo "Copy image to Nexus Docker Registry"
+
+    sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-parks-dev/nationalparks:${devTag} docker://nexus-registry-${GUID}-nexus.apps.${CLUSTER}/nationalparks:${devTag}"
+
+    // Tag the built image with the production tag.
+    // Replace xyz-tasks-dev with the name of your dev project
+    openshiftTag alias: 'false', destStream: 'nationalparks', destTag: prodTag, destinationNamespace: '${GUID}-parks-dev', namespace: '${GUID}-parks-dev', srcStream: 'nationalparks', srcTag: devTag, verbose: 'false'
+  }
+
+  // Blue/Green Deployment into Production
+  // -------------------------------------
+  // Do not activate the new version yet.
+  def destApp = "nationalparks-green"
+  def activeApp = ""
+
+  stage('Blue/Green Production Deployment') {
+      // Replace xyz-tasks-dev and xyz-tasks-prod with
+    // your project names
+    activeApp = sh(returnStdout: true, script: "oc get route nationalparks -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
+    if (activeApp == "nationalparks-green") {
+    destApp = "nationalparks-blue"
+  }
+    echo "Active Application:      " + activeApp
+    echo "Destination Application: " + destApp
+
+    // Update the Image on the Production Deployment Config
+    sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/nationalparks:${prodTag} -n ${GUID}-parks-prod"
+
+    // Deploy the inactive application.
+    // Replace xyz-tasks-prod with the name of your production project
+    openshiftDeploy depCfg: destApp, namespace: '${GUID}-parks-prod', verbose: 'false', waitTime: '20', waitUnit: 'min'
+    openshiftVerifyDeployment depCfg: destApp, namespace: '${GUID}-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
+    openshiftVerifyService namespace: '${GUID}-parks-prod', svcName: destApp, verbose: 'false'
+  }
+
+  stage('Switch over to new Version') {
+
+    echo "Switching Production application to ${destApp}."
+    // Replace xyz-tasks-prod with the name of your production project
+    sh 'oc patch route nationalparks -n ${GUID}-parks-prod -p \'{"spec":{"to":{"name":"' + destApp + '"}}}\''
+  }
+
     // Your Pipeline Code goes here. Make sure to use the ${GUID} and ${CLUSTER} parameters where appropriate
     // You need to build the application in directory `Nationalparks`.
     // Also copy "../nexus_settings.xml" to your build directory
