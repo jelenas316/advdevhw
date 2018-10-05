@@ -40,7 +40,7 @@ while : ; do
     oc get pod -n ${GUID}-nexus | grep '\-1\-' | grep -v deploy | grep "1/1"
     if [ $? == "1" ] 
       then 
-        sleep 10
+        sleep 20
       else 
         break 
     fi
