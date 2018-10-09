@@ -17,4 +17,8 @@ echo "Resetting Parks Production Environment in project ${GUID}-parks-prod to Gr
 # up the whole infrastructure to guarantee a Blue
 # rollout followed by a Green rollout.
 
-# To be Implemented by Student
+####    Reset the three microservices to the Green version to guarantee a Blue rollout upon the first pipeline run
+
+oc patch route/mlbparks -p '{"spec":{"to":{"name":"mlbparks-green"}}}' -n $GUID-parks-prod 
+oc patch route/nationalparks -p '{"spec":{"to":{"name":"nationalparks-green"}}}' -n $GUID-parks-prod 
+oc patch route/parksmap   -p '{"spec":{"to":{"name":"parksmap-green"}}}' -n $GUID-parks-prod 

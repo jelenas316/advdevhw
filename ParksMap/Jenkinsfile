@@ -58,7 +58,7 @@ podTemplate(
     stage('Code Analysis') {
       echo "Running Code Analysis"
     
-      sh "${mvnCmd} -f ./ParksMap/pom.xml sonar:sonar -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.${CLUSTER}/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+     sh "${mvnCmd} -f ./ParksMap/pom.xml sonar:sonar -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.${CLUSTER}/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
     }
 
     // Publish the built war file to Nexus
@@ -85,9 +85,9 @@ podTemplate(
 
     // Deploy the development application.
     // Replace xyz-tasks-dev with the name of your production project
-    openshiftDeploy depCfg: 'parksmap', namespace: '${GUID}-parks-dev', verbose: 'false', waitTime: '20', waitUnit: 'min'
+    openshiftDeploy depCfg: 'parksmap', namespace: '${GUID}-parks-dev', verbose: 'true', waitTime: '40', waitUnit: 'min'
     openshiftVerifyDeployment depCfg: 'parksmap', namespace: '${GUID}-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
-    openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'parksmap', verbose: 'false'
+    openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'parksmap', verbose: 'true'
   }
 
   stage('Integration Tests') {
@@ -101,7 +101,9 @@ podTemplate(
   stage('Copy Image to Nexus Docker Registry') {
     echo "Copy image to Nexus Docker Registry"
 
-    sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-parks-dev/parksmap:${devTag} docker://nexus-registry-${GUID}-nexus.apps.${CLUSTER}/parksmap:${devTag}"
+    
+    sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/${GUID}-parks-dev/parksmap:${devTag} docker://nexus-registry.${GUID}-nexus.svc.cluster.local:5000/parksmap:${devTag}"
+
 
     // Tag the built image with the production tag.
     // Replace xyz-tasks-dev with the name of your dev project
@@ -117,6 +119,9 @@ podTemplate(
   stage('Blue/Green Production Deployment') {
       // Replace xyz-tasks-dev and xyz-tasks-prod with
     // your project names
+    echo "First little test"
+    sh(returnStdout: true, script: "oc get route parksmap -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
+    
     activeApp = sh(returnStdout: true, script: "oc get route parksmap -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
     if (activeApp == "parksmap-green") {
     destApp = "parksmap-blue"

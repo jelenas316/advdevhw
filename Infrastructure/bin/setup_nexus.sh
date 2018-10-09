@@ -28,23 +28,26 @@ echo "Setting up Nexus in project $GUID-nexus"
 # Ideally just calls a template
 # oc new-app -f ../templates/nexus.yaml --param .....
 
-# To be Implemented by Student
-
-
-
-oc process -f Infrastructure/templates/nexus-template.yaml -n ${GUID}-nexus -p GUID=${GUID} | oc create -n ${GUID}-nexus -f -
+oc project $GUID-nexus 
+oc process -f Infrastructure/templates/nexus.yml -n ${GUID}-nexus -p GUID=${GUID} | oc create -n ${GUID}-nexus -f -
 oc expose svc nexus3 -n ${GUID}-nexus
 oc expose svc nexus-registry -n ${GUID}-nexus
 
 while : ; do
+ echo "Checking if Nexus is Ready..."
+  
     oc get pod -n ${GUID}-nexus | grep '\-1\-' | grep -v deploy | grep "1/1"
     if [ $? == "1" ] 
       then 
-        sleep 20
+      echo "...no. Sleeping 10 seconds."
+        sleep 10
       else 
         break 
     fi
 done
+oc get routes -n $GUID-nexus
+sleep 60
+echo 'When Nexus is running, populate Nexus with the correct repositories'
 
 curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh
 
@@ -52,7 +55,5 @@ chmod +x setup_nexus3.sh
 
 sh setup_nexus3.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}' -n ${GUID}-nexus )
 rm -f setup_nexus3.sh
-
-
-
+oc get routes -n $GUID-nexus
 

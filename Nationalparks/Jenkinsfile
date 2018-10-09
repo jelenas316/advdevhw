@@ -31,7 +31,8 @@ podTemplate(
 
     sh "sed -i 's/CLUSTER/${CLUSTER}/' ./Nationalparks/nexus_settings.xml"
     
-    def mvnCmd = "mvn -s ./nexus_settings.xml"
+    def mvnCmd = "mvn -s ./Nationalparks/nexus_settings.xml"
+    
 
     def groupId    = getGroupIdFromPom("./Nationalparks/pom.xml")
     def artifactId = getArtifactIdFromPom("./Nationalparks/pom.xml")
@@ -45,7 +46,8 @@ podTemplate(
     stage('Build war') {
       echo "Building version ${version}"
     
-      sh "${mvnCmd} -f ./Nationalparks/pom.xml clean package -DskipTests"
+      //sh "${mvnCmd} -f ./Nationalparks/pom.xml clean package -DskipTests"
+    sh "${mvnCmd} -f ./Nationalparks/pom.xml clean package -Dmaven.test.skip=true"
     }
 
     // Using Maven run the unit tests
@@ -53,6 +55,8 @@ podTemplate(
       echo "Running Unit Tests"
     
       sh "${mvnCmd} -f ./Nationalparks/pom.xml test"
+    
+    
     }
     
     // Using Maven call SonarQube for Code Analysis
@@ -86,7 +90,7 @@ podTemplate(
 
     // Deploy the development application.
     // Replace xyz-tasks-dev with the name of your production project
-    openshiftDeploy depCfg: 'nationalparks', namespace: '${GUID}-parks-dev', verbose: 'false', waitTime: '20', waitUnit: 'min'
+    openshiftDeploy depCfg: 'nationalparks', namespace: '${GUID}-parks-dev', verbose: 'true', waitTime: '40', waitUnit: 'min'
     openshiftVerifyDeployment depCfg: 'nationalparks', namespace: '${GUID}-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
     openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'nationalparks', verbose: 'false'
   }
@@ -130,7 +134,7 @@ podTemplate(
 
     // Deploy the inactive application.
     // Replace xyz-tasks-prod with the name of your production project
-    openshiftDeploy depCfg: destApp, namespace: '${GUID}-parks-prod', verbose: 'false', waitTime: '20', waitUnit: 'min'
+    openshiftDeploy depCfg: destApp, namespace: '${GUID}-parks-prod', verbose: 'false', waitTime: '40', waitUnit: 'min'
     openshiftVerifyDeployment depCfg: destApp, namespace: '${GUID}-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
     openshiftVerifyService namespace: '${GUID}-parks-prod', svcName: destApp, verbose: 'false'
   }
