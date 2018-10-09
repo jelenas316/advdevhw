@@ -5,7 +5,7 @@ metadata:
 spec:
   source:
     git:
-      uri: "https://github.com/berrutig/advdev_homework_template.git"
+      uri: "https://github.com/dulecux/adv-homework_template.git"
   strategy:
     jenkinsPipelineStrategy:
       jenkinsfilePath: ParksMap/Jenkinsfile
