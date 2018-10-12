@@ -149,7 +149,7 @@ objects:
             value: jdbc:postgresql://postgresql/sonar
           - name: SONARQUBE_JDBC_USERNAME
             value: sonar
-          image: wkulhanek/sonarqube@sha256:8881232a1cd5636768df366eb8803255276618bf6252b01516c0a70bcaaf4943
+          image: wkulhanek/sonarqube
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
